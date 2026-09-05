@@ -1,12 +1,12 @@
 <?php
 /**
- * Handle our admin side setup.
+ * Handle our admin side config.
  *
  * @package ContentColdStorage
  */
 
 // Declare our namespace.
-namespace Norcross\ContentColdStorage\AdminSetup;
+namespace Norcross\ContentColdStorage\Admin\Config;
 
 /**
  * Start our engines.
@@ -59,13 +59,12 @@ function admin_removable_args( $args ) {
 }
 
 /**
- * Set the post types that this can be enabled on.
- * Defaults to all.
+ * Set the post types that this can be enabled on. Defaults to posts and pages.
  *
- * @return array  An empty array assumed all post types are allowed.
+ * @return array  An array of all post types are allowed.
  */
 function get_allowed_post_types() {
-	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'allowed_post_types', [] );
+	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'allowed_post_types', ['post','page'] );
 }
 
 /**
@@ -75,7 +74,7 @@ function get_allowed_post_types() {
  * @return array  The array of statuses.
  */
 function get_allowed_post_statuses() {
-	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'allowed_post_statuses', [] );
+	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'allowed_post_statuses', ['draft','publish','future','pending'] );
 }
 
 /**

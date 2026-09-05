@@ -6,19 +6,19 @@
  */
 
 // Declare our namespace.
-namespace Norcross\ContentColdStorage\PostTypes;
+namespace Norcross\ContentColdStorage\Structure\PostTypes;
 
 /**
  * Start our engines.
  */
-add_action( 'init', __NAMESPACE__ . '\register_ccs_post_type' );
+add_action( 'init', __NAMESPACE__ . '\register_cold_storage_post_type' );
 
 /**
  * Set the cold storage post type.
  *
  * @return void
  */
-function register_ccs_post_type() {
+function register_cold_storage_post_type() {
 
 	// Define our labels.
 	$set_label_args = [
@@ -46,7 +46,7 @@ function register_ccs_post_type() {
 		'public'              => false,
 		'show_ui'             => true,
 		'show_in_menu'        => true,
-		'menu_position'       => 55,
+		'menu_position'       => 200,
 		'menu_icon'           => 'dashicons-index-card',
 		'show_in_admin_bar'   => false,
 		'show_in_nav_menus'   => false,
@@ -62,6 +62,9 @@ function register_ccs_post_type() {
 		'has_archive'         => false,
 		'rewrite'             => false,
 	];
+
+	// Allow a filter of the post type args here.
+	$set_type_args  = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'post_type_args', $set_type_args );
 
 	// And register the post type.
 	register_post_type( 'cold-storage', $set_type_args );

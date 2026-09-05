@@ -32,5 +32,8 @@ define( __NAMESPACE__ . '\NONCE_PREFIX', 'ccs_nonce_' );
 define( __NAMESPACE__ . '\OPTION_PREFIX', 'ccs_setting_' );
 
 // And load our files.
-require_once __DIR__ . '/includes/post-types.php';
-require_once __DIR__ . '/includes/setup.php';
+require_once __DIR__ . '/includes/admin/config.php';
+require_once __DIR__ . '/includes/admin/menu-items.php';
+
+require_once __DIR__ . '/includes/structure/post-types.php';
+require_once __DIR__ . '/includes/structure/row-actions.php';
