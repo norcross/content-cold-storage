@@ -63,25 +63,55 @@ function admin_removable_args( $args ) {
  *
  * @return array  An array of all post types are allowed.
  */
-function get_allowed_post_types() {
-	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'allowed_post_types', ['post','page'] );
+function get_enabled_post_types() {
+	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'enabled_post_types', ['post','page'] );
 }
 
 /**
- * Set the post statuses that this can be enabled on.
- * Defaults to draft, published, and scheduled.
+ * Set the post statuses that this can be enabled on. Defaults to draft, published, and scheduled.
  *
  * @return array  The array of statuses.
  */
-function get_allowed_post_statuses() {
-	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'allowed_post_statuses', ['draft','publish','future','pending'] );
+function get_enabled_post_statuses() {
+	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'enabled_post_statuses', ['draft','publish','future','pending'] );
 }
 
 /**
- * Set the default user permisson.
+ * Set the required user cap.
  *
  * @return string
  */
-function get_user_cap_for_run() {
-	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'allowed_user_perm', 'edit_others_posts' );
+function get_required_user_cap() {
+	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'required_user_cap', 'edit_others_posts' );
+}
+
+/**
+ * Set any IDs that should not be allowed to move to cold storage. Includes front page and blog page IDs.
+ *
+ * @return array
+ */
+function get_excluded_post_ids() {
+
+	// Set our empty.
+	$set_excluded   = [];
+
+	// Get our two possible values.
+	$maybe_front    = get_option( 'page_on_front', 0 );
+	$maybe_posts    = get_option( 'page_for_posts', 0 );
+
+	// Add it if we have a front page.
+	if ( ! empty( $maybe_front ) ) {
+		$set_excluded[] = $maybe_front;
+	}
+
+	// Add it if we have a posts page.
+	if ( ! empty( $maybe_posts ) ) {
+		$set_excluded[] = $maybe_posts;
+	}
+
+	// Set it get filtered first.
+	$set_excluded   = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'excluded_post_ids', $set_excluded );
+
+	// Now send it back with all the integers.
+	return array_map( 'absint', $set_excluded );
 }

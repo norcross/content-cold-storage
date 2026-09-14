@@ -24,7 +24,7 @@ add_action( 'admin_menu', __NAMESPACE__ . '\modify_admin_menu', 11 );
 function modify_admin_menu() {
 
 	// If the current user doesn't have the cap, remove it.
-	if ( ! current_user_can( AdminConfig\get_user_cap_for_run() ) ) {
+	if ( ! current_user_can( AdminConfig\get_required_user_cap() ) ) {
 		remove_menu_page( 'edit.php?post_type=cold-storage' );
 	}
 

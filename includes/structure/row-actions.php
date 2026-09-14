@@ -25,13 +25,23 @@ add_action( 'page_row_actions', __NAMESPACE__ . '\add_cold_storage_row_actions',
  */
 function add_cold_storage_row_actions( array $actions, \WP_Post $post ) {
 
+	// Don't show this for users who can't.
+	if ( ! current_user_can( AdminConfig\get_required_user_cap() ) ) {
+		return $actions;
+	}
+
 	// Only do this on post types we support.
-	if ( empty( $post->post_type ) || ! in_array( $post->post_type, AdminConfig\get_allowed_post_types(), true ) ) {
+	if ( empty( $post->post_type ) || ! in_array( $post->post_type, AdminConfig\get_enabled_post_types(), true ) ) {
 		return $actions;
 	}
 
 	// Only do this on post statuses we support.
-	if ( empty( $post->post_status ) || ! in_array( $post->post_status, AdminConfig\get_allowed_post_statuses(), true ) ) {
+	if ( empty( $post->post_status ) || ! in_array( $post->post_status, AdminConfig\get_enabled_post_statuses(), true ) ) {
+		return $actions;
+	}
+
+	// Do our check for excluded IDs.
+	if ( empty( $post->ID ) || in_array( absint( $post->ID ), AdminConfig\get_excluded_post_ids(), true ) ) {
 		return $actions;
 	}
 
