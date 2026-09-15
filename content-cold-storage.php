@@ -28,6 +28,7 @@ define( __NAMESPACE__ . '\VERS', '0.0.1' );
 
 // Set a few prefixes.
 define( __NAMESPACE__ . '\ACTION_PREFIX', 'ccs_' );
+define( __NAMESPACE__ . '\META_PREFIX', 'ccs_meta_' );
 define( __NAMESPACE__ . '\NONCE_PREFIX', 'ccs_nonce_' );
 define( __NAMESPACE__ . '\OPTION_PREFIX', 'ccs_setting_' );
 

@@ -51,14 +51,15 @@ function register_cold_storage_post_type() {
 		'show_in_admin_bar'   => false,
 		'show_in_nav_menus'   => false,
 		'can_export'          => true,
-		'exclude_from_search' => false,
+		'exclude_from_search' => true,
 		'publicly_queryable'  => false,
 		'capability_type'     => 'post',
 		'capabilities'        => [
 			'create_posts' => false,
+			'delete_posts' => true,
 		],
 		'map_meta_cap'        => false,
-		'show_in_rest'        => false,
+		'show_in_rest'        => true,
 		'has_archive'         => false,
 		'rewrite'             => false,
 	];
