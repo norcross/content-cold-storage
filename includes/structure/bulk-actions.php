@@ -6,7 +6,7 @@
  */
 
 // Declare our namespace.
-namespace Norcross\ContentColdStorage\Admin\BulkActions;
+namespace Norcross\ContentColdStorage\Structure\BulkActions;
 
 // Set our aliases.
 use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
@@ -18,7 +18,7 @@ add_action( 'init', __NAMESPACE__ . '\manage_enabled_bulk_action_items' );
 add_filter( 'bulk_actions-edit-cold-storage', __NAMESPACE__ . '\add_revert_bulk_action', 30 );
 
 /**
- * Add the bulk actions to an applicable dropdown.
+ * Add the bulk actions to an applicable dropdowns.
  */
 function manage_enabled_bulk_action_items() {
 
@@ -54,7 +54,7 @@ function add_enabled_bulk_action( $actions ) {
 	}
 
 	// Add our action.
-	$actions['ccs-run-bulk'] = __( 'Move to Cold Storage', 'content-cold-storage' );
+	$actions['ccs-bulk-run'] = __( 'Move to Cold Storage', 'content-cold-storage' );
 
 	// And return the resulting array.
 	return $actions;
@@ -83,7 +83,7 @@ function add_revert_bulk_action( $actions ) {
 	}
 
 	// Add our action.
-	$actions['ccs-revert-bulk'] = __( 'Restore to Original', 'content-cold-storage' );
+	$actions['ccs-bulk-revert'] = __( 'Restore to Original', 'content-cold-storage' );
 
 	// And return the resulting array.
 	return $actions;
