@@ -95,18 +95,23 @@ function get_excluded_post_ids() {
 	// Set our empty.
 	$set_excluded   = [];
 
-	// Get our two possible values.
-	$maybe_front    = get_option( 'page_on_front', 0 );
-	$maybe_posts    = get_option( 'page_for_posts', 0 );
+	// Set an array of the options we wanna check.
+	$option_array   = [
+		'page_on_front',
+		'page_for_posts',
+		'wp_page_for_privacy_policy',
+	];
 
-	// Add it if we have a front page.
-	if ( ! empty( $maybe_front ) ) {
-		$set_excluded[] = $maybe_front;
-	}
+	// Loop, and if it exists, exclude it.
+	foreach ( $option_array as $option_key ) {
 
-	// Add it if we have a posts page.
-	if ( ! empty( $maybe_posts ) ) {
-		$set_excluded[] = $maybe_posts;
+		// Check for the value.
+		$has_value  = get_option( $option_key, 0 );
+
+		// Add it if we have it.
+		if ( ! empty( $has_value ) ) {
+			$set_excluded[] = $has_value;
+		}
 	}
 
 	// Set it get filtered first.
