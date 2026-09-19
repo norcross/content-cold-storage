@@ -58,14 +58,10 @@ function register_cold_storage_post_type() {
 			'create_posts' => false,
 			'delete_posts' => true,
 		],
-		'map_meta_cap'        => false,
 		'show_in_rest'        => true,
 		'has_archive'         => false,
 		'rewrite'             => false,
 	];
-
-	// Allow a filter of the post type args here.
-	$set_type_args  = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'post_type_args', $set_type_args );
 
 	// And register the post type.
 	register_post_type( 'cold-storage', $set_type_args );

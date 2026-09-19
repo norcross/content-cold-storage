@@ -55,10 +55,10 @@ function add_cold_storage_row_actions( array $actions, \WP_Post $post ) {
 
 	// Define our args for the link.
 	$setup_args = [
-		'ccs-workflow' => 'yes',
-		'ccs-action'   => 'ccs-single-run',
-		'ccs-post-id'  => $post->ID,
-		'ccs-nonce'    => wp_create_nonce( \Norcross\ContentColdStorage\NONCE_PREFIX . 'cold_store_row' ),
+		'ccs-action'    => 'ccs-single-run',
+		'ccs-post-id'   => $post->ID,
+		'ccs-post-type' => $post->post_type,
+		'ccs-nonce'     => wp_create_nonce( \Norcross\ContentColdStorage\NONCE_PREFIX . 'cold_store_row' ),
 	];
 
 	// Build our link.

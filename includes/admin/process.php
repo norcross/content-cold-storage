@@ -17,10 +17,68 @@ use WP_Error;
 /**
  * Start our engines.
  */
+add_action( 'admin_init', __NAMESPACE__ . '\run_enabled_row_processing' );
 add_action( 'admin_init', __NAMESPACE__ . '\manage_enabled_bulk_processing' );
 
 /**
+ * See if there is any cold store processes to run.
+ *
+ * @return void
+ */
+function run_enabled_row_processing() {
+
+	// This never runs on front end.
+	if ( ! is_admin() ) {
+		return;
+	}
+
+	// See if we have a trigger.
+	$check_trigger  = filter_input( INPUT_GET, 'ccs-action', FILTER_SANITIZE_SPECIAL_CHARS );
+
+	// Do nothing without it.
+	if ( empty( $check_trigger ) || 'ccs-single-run' !== $check_trigger ) {
+		return;
+	}
+
+	// Grab the nonce value.
+	$confirm_nonce  = filter_input( INPUT_GET, 'ccs-nonce', FILTER_SANITIZE_SPECIAL_CHARS );
+
+	// Handle the nonce check and die if there is a failure.
+	if ( empty( $confirm_nonce ) || ! wp_verify_nonce( $confirm_nonce, \Norcross\ContentColdStorage\NONCE_PREFIX . 'cold_store_row' ) ) {
+		wp_die( esc_html__( 'There was an error validating the nonce.', 'content-cold-storage' ), esc_html__( 'Content Cold Storage', 'content-cold-storage' ), [ 'back_link' => true ] );
+	}
+
+	// Grab the passed post ID.
+	$get_post_id    = filter_input( INPUT_GET, 'ccs-post-id', FILTER_SANITIZE_NUMBER_INT );
+
+	// Bail without a post ID.
+	if ( empty( $get_post_id ) ) {
+		wp_die( esc_html__( 'A post ID is required to run a cold storage request.', 'content-cold-storage' ), esc_html__( 'Content Cold Storage', 'content-cold-storage' ), [ 'back_link' => true ] );
+	}
+
+	// Now run it.
+	// @todo handle the error checking.
+	process_single_storage( $get_post_id, 'row-action' );
+
+	// Now set up the link that'll redirect.
+	$setup_args = [
+		'post_type'   => filter_input( INPUT_GET, 'ccs-post-type', FILTER_SANITIZE_SPECIAL_CHARS ),
+		'ccs-success' => true,
+		'ccs-action'  => 'run-row',
+	];
+
+	// Get the link itself.
+	$setup_link  = add_query_arg( $setup_args, admin_url( '/edit.php' ) );
+
+	// Do the redirect.
+	wp_safe_redirect( $setup_link );
+	exit;
+}
+
+/**
  * Add the bulk action processing to applicable post types.
+ *
+ * @return void
  */
 function manage_enabled_bulk_processing() {
 
@@ -63,12 +121,15 @@ function run_enabled_bulk_actions( $sendback, $action, $post_ids ) {
 	}
 
 	// Now loop and process each one.
+	// @todo include some error handling.
 	foreach ( $post_ids as $post_id ) {
-		process_single_storage( $post_id, 'row-action' );
+		process_single_storage( $post_id, 'bulk-action' );
 	}
 
 	// Set the return args to include.
 	$rtn_args = [
+		'ccs-success'    => true,
+		'ccs-action'     => 'run-bulk',
 		'ccs-bulk-count' => count( $post_ids ),
 	];
 
@@ -77,83 +138,6 @@ function run_enabled_bulk_actions( $sendback, $action, $post_ids ) {
 
 	// And return the link.
 	return $sendback;
-}
-
-/**
- * See if there is any cold store processes to run.
- *
- * @return void
- */
-function maybe_run_cold_storage() {
-
-	// This never runs on front end.
-	if ( ! is_admin() ) {
-		return;
-	}
-
-	// preprint($_GET );
-	// preprint($_POST, true);
-
-	/*
-	// See if we have a trigger.
-	$check_trigger  = filter_input( INPUT_GET, 'scc-run-check', FILTER_SANITIZE_SPECIAL_CHARS );
-
-	// Do nothing without it.
-	if ( empty( $check_trigger ) || 'yes' !== $check_trigger ) {
-		return;
-	}
-
-	// Grab the nonce value.
-	$confirm_nonce  = filter_input( INPUT_GET, 'scc-run-nonce', FILTER_SANITIZE_SPECIAL_CHARS );
-
-	// Handle the nonce check and die if there is a failure.
-	if ( empty( $confirm_nonce ) || ! wp_verify_nonce( $confirm_nonce, \ScheduledContentChecks\NONCE_PREFIX . 'manual_run' ) ) {
-		wp_die( esc_html__( 'There was an error validating the nonce.', 'scheduled-content-checks' ), esc_html__( 'Scheduled Content Checks', 'scheduled-content-checks' ), [ 'back_link' => true ] );
-	}
-
-	// Bail if current user doesn't have cap.
-	if ( ! current_user_can( \ScheduledContentChecks\AdminSetup\get_user_cap_for_run() ) ) {
-		wp_die( esc_html__( 'Sorry, you are not authorized to perform this action.', 'scheduled-content-checks' ), esc_html__( 'Scheduled Content Checks', 'scheduled-content-checks' ), [ 'back_link' => true ] );
-	}
-
-	// See if we missed any.
-	$missed_ids = \ScheduledContentChecks\Queries\get_missed_scheduled_content();
-
-	// If we have none, redirect with that.
-	if ( empty( $missed_ids ) ) {
-
-		// Now set up the link that'll redirect.
-		$setup_args = [
-			'scc-run-result' => 'empty',
-			'scc-run-count'  => 0,
-		];
-
-		// Get the link itself.
-		$setup_link  = add_query_arg( $setup_args, admin_url( '/' ) );
-
-		// Do the redirect.
-		wp_safe_redirect( $setup_link );
-		exit;
-	}
-
-	// Now loop and publish any missing.
-	foreach ( $missed_ids as $post_id ) {
-		wp_publish_post( $post_id );
-	}
-
-	// Now set up the link that'll redirect.
-	$setup_args = [
-		'scc-run-result' => 'success',
-		'scc-run-count'  => count( $missed_ids ),
-	];
-
-	// Get the link itself.
-	$setup_link  = add_query_arg( $setup_args, admin_url( '/' ) );
-
-	// Do the redirect.
-	wp_safe_redirect( $setup_link );
-	exit;
-	*/
 }
 
 /**
@@ -189,11 +173,17 @@ function process_single_storage( $post_id = 0, $source = '' ) {
 		return new WP_Error( 'invalid_post_status', __( 'The post status for this ID is not approved for cold storage.', 'content-cold-storage' ) );
 	}
 
+	// Include an action before making the change.
+	do_action( \Norcross\ContentColdStorage\META_PREFIX . 'before_cold_storage', $post_id, $setup_post, $source );
+
 	// Set the args for updating the post.
 	$setup_args = [
 		'ID'        => absint( $post_id ),
 		'post_type' => 'cold-storage',
 	];
+
+	// Allow a filter of the setup args here.
+	$setup_args = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'pre_convert_args', $setup_args, $setup_post, $source );
 
 	// Run the update.
 	$maybe_move = wp_update_post( $setup_args, false, false );
@@ -212,10 +202,13 @@ function process_single_storage( $post_id = 0, $source = '' ) {
 	];
 
 	// Allow a filter of the audit args here.
-	$audit_args  = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'audit_args', $audit_args, $setup_post );
+	$audit_args = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'audit_args', $audit_args, $setup_post );
 
 	// Update the metadata.
 	update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'audit_record', $audit_args );
+
+	// Include an action after making the change.
+	do_action( \Norcross\ContentColdStorage\META_PREFIX . 'after_cold_storage', $post_id, $source );
 
 	// Return true since we made it.
 	return true;
