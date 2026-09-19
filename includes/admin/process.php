@@ -134,7 +134,7 @@ function run_enabled_bulk_actions( $sendback, $action, $post_ids ) {
 	];
 
 	// Add our own query args so we can do a notice.
-	$sendback = add_query_arg( 'ccs-bulk-count', $rtn_args, $sendback );
+	$sendback = add_query_arg( $rtn_args, $sendback );
 
 	// And return the link.
 	return $sendback;
