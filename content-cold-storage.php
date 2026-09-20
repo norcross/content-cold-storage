@@ -34,7 +34,7 @@ define( __NAMESPACE__ . '\OPTION_PREFIX', 'ccs_setting_' );
 
 // And load our files.
 require_once __DIR__ . '/includes/admin/config.php';
-require_once __DIR__ . '/includes/admin/menu-items.php';
+require_once __DIR__ . '/includes/admin/display.php';
 require_once __DIR__ . '/includes/admin/notices.php';
 require_once __DIR__ . '/includes/admin/process.php';
 
