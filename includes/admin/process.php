@@ -178,8 +178,11 @@ function process_single_storage( $post_id = 0, $source = '' ) {
 
 	// Set the args for updating the post.
 	$setup_args = [
-		'ID'        => absint( $post_id ),
-		'post_type' => 'cold-storage',
+		'ID'             => absint( $post_id ),
+		'post_type'      => 'cold-storage',
+		'post_name'      => 'cs-' . strtotime( $setup_post->post_date ),
+		'comment_status' => 'closed',
+		'ping_status'    => 'closed',
 	];
 
 	// Allow a filter of the setup args here.
@@ -199,13 +202,16 @@ function process_single_storage( $post_id = 0, $source = '' ) {
 		'source' => $source,
 		'time'   => time(),
 		'type'   => $setup_post->post_type,
+		'slug'   => $setup_post->post_name,
 	];
 
 	// Allow a filter of the audit args here.
 	$audit_args = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'audit_args', $audit_args, $setup_post );
 
-	// Update the metadata.
-	update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'audit_record', $audit_args );
+	// Update the metadata, assuming we didn't clear it out.
+	if ( ! empty( $audit_args ) ) {
+		update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'audit_record', $audit_args );
+	}
 
 	// Include an action after making the change.
 	do_action( \Norcross\ContentColdStorage\META_PREFIX . 'after_cold_storage', $post_id, $source );
