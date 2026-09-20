@@ -38,7 +38,7 @@ function display_admin_notices() {
 
 		// Generate our success text.
 		/* translators: %d: how many were found */
-		$setup_text = sprintf( _n( 'Success! %d items was moved to cold storage.', 'Success! %d items were moved to cold content-cold-storage.', $get_count, 'content-cold-storage' ), $get_count )
+		$setup_text = sprintf( _n( 'Success! %d items was moved to cold storage.', 'Success! %d items were moved to cold content-cold-storage.', $get_count, 'content-cold-storage' ), $get_count );
 
 		// And display the notice.
 		wp_admin_notice(
