@@ -14,8 +14,30 @@ use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
 /**
  * Start our engines.
  */
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_row_action_css' );
 add_action( 'admin_menu', __NAMESPACE__ . '\modify_admin_menu', 11 );
 add_filter( 'post_date_column_time', __NAMESPACE__ . '\add_storage_date_info', 20, 4 );
+
+/**
+ * Make our row action stand out a bit.
+ *
+ * @return void
+ */
+function load_row_action_css() {
+
+	// Set my CSS up.
+	$setup_css  = '
+		a.ccs-action-row-link {
+			color: #d14d9e;
+		}
+		a.ccs-action-row-link:hover,
+		a.ccs-action-row-link:focus {
+			color: #ab3c80;
+		}';
+
+	// And add the CSS.
+	wp_add_inline_style( 'common', $setup_css );
+}
 
 /**
  * Make sure the menu option isn't there for people

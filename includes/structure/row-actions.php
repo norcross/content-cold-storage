@@ -66,7 +66,7 @@ function add_cold_storage_row_actions( array $actions, \WP_Post $post ) {
 
 	// And include our action.
 	$actions['ccs-add-cold'] = sprintf(
-		'<a class="ccs-action-row-link ccs-cold-store-row-link" href="%1$s" rel="bookmark" aria-label="%2$s">%3$s</a>',
+		'<a class="ccs-action-row-link ccs-cold-store-row-link" href="%1$s" rel="bookmark" title="%2$s" aria-label="%2$s">%3$s</a>',
 		esc_url( $setup_link ),
 		esc_attr__( 'Move this content to the cold storage location.', 'content-cold-storage' ),
 		esc_html__( 'Cold Storage', 'content-cold-storage' )

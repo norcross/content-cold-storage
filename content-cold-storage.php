@@ -37,6 +37,7 @@ require_once __DIR__ . '/includes/admin/config.php';
 require_once __DIR__ . '/includes/admin/display.php';
 require_once __DIR__ . '/includes/admin/notices.php';
 require_once __DIR__ . '/includes/admin/process.php';
+require_once __DIR__ . '/includes/admin/triggers.php';
 
 require_once __DIR__ . '/includes/structure/bulk-actions.php';
 require_once __DIR__ . '/includes/structure/post-types.php';
