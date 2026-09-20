@@ -51,7 +51,10 @@ function admin_removable_args( $args ) {
 
 	// Set an array of the args we wanna exclude.
 	$remove = [
-		'ccs-eventual-arg-here',
+		'ccs-action',
+		'ccs-error',
+		'ccs-success',
+		'ccs-bulk-count',
 	];
 
 	// Include my new args and return.
