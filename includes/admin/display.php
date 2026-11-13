@@ -14,16 +14,16 @@ use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
 /**
  * Start our engines.
  */
-add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_row_action_css' );
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_cs_admin_css' );
 add_action( 'admin_menu', __NAMESPACE__ . '\modify_admin_menu', 11 );
-add_filter( 'post_date_column_time', __NAMESPACE__ . '\add_storage_date_info', 20, 4 );
 
 /**
- * Make our row action stand out a bit.
+ * Add some CSS to make our row action
+ * stand out a bit and condense the column.
  *
  * @return void
  */
-function load_row_action_css() {
+function load_cs_admin_css() {
 
 	// Set my CSS up.
 	$setup_css  = '
@@ -33,7 +33,8 @@ function load_row_action_css() {
 		a.ccs-action-row-link:hover,
 		a.ccs-action-row-link:focus {
 			color: #ab3c80;
-		}';
+		}
+	';
 
 	// And add the CSS.
 	wp_add_inline_style( 'common', $setup_css );
@@ -52,45 +53,4 @@ function modify_admin_menu() {
 	}
 
 	// Nothing left inside this.
-}
-
-/**
- * Add information to the existing date column.
- *
- * @param string  $ttime        The published time.
- * @param WP_Post $post         Post object.
- * @param string  $column_name  The column name.
- * @param string  $mode         The list display mode ('excerpt' or 'list').
- */
-function add_storage_date_info( $ttime, $post, $column_name, $mode ) {
-
-	// Don't attempt to do this on other post types.
-	if ( empty( $post->post_type ) || 'cold-storage' !== $post->post_type ) {
-		return $ttime;
-	}
-
-	// Get our cold storage info.
-	$audit  = get_post_meta( absint( $post->ID ), \Norcross\ContentColdStorage\META_PREFIX . 'audit_record', true );
-
-	// Start appending the existing.
-	$ttime .= '<hr>';
-	$ttime .= esc_html__( 'Stored', 'content-cold-storage' );
-	$ttime .= '<br>';
-
-	// Assuming we have the time, show it.
-	if ( ! empty( $audit['time'] ) ) {
-		$ttime .= sprintf(
-			/* translators: 1: Post date, 2: Post time. */
-			__( '%1$s at %2$s' ),
-			/* translators: Post date format. See https://www.php.net/manual/datetime.format.php */
-			gmdate( __( 'Y/m/d' ), $audit['time'] ),
-			/* translators: Post time format. See https://www.php.net/manual/datetime.format.php */
-			gmdate( __( 'g:i a' ), $audit['time'] )
-		);
-	} else {
-		$ttime .= '<em>' . esc_html__( 'Unknown', 'content-cold-storage' ) . '</em>';
-	}
-
-	// Send back our appended string.
-	return $ttime;
 }

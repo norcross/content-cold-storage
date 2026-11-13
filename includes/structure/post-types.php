@@ -24,6 +24,9 @@ add_action( 'template_redirect', __NAMESPACE__ . '\restrict_cold_storage_access'
  */
 function register_cold_storage_post_type() {
 
+	// Get all the registered taxonomies.
+	$registered_tax = get_taxonomies( ['public' => true, '_builtin' => true] );
+
 	// Define our labels.
 	$set_label_args = [
 		'name'                  => _x( 'Cold Storage', 'Post Type General Name', 'content-cold-storage' ),
@@ -45,6 +48,7 @@ function register_cold_storage_post_type() {
 			'revisions',
 			'custom-fields',
 			'comments',
+			'page-attributes',
 		],
 		'hierarchical'        => false,
 		'public'              => false,
@@ -65,6 +69,7 @@ function register_cold_storage_post_type() {
 		'show_in_rest'        => true,
 		'has_archive'         => false,
 		'rewrite'             => false,
+		'taxonomies'          => array_keys( $registered_tax ),
 	];
 
 	// And register the post type.
