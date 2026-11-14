@@ -27,6 +27,24 @@ function load_cs_admin_css() {
 
 	// Set my CSS up.
 	$setup_css  = '
+
+		.column-ccs-comm-count {
+			width: 60px;
+		}
+
+		.column-ccs-comm-count .ccs-table-comment-count {
+			color: #fff;
+			background-color: #646970;
+			padding: 3px;
+			border-radius: 50%;
+			height: 20px;
+			width: 20px;
+			display: inline-block;
+			text-align: center;
+			font-weight: 700;
+			margin-left: -6px;
+		}
+
 		a.ccs-action-row-link {
 			color: #d14d9e;
 		}

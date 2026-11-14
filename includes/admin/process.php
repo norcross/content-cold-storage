@@ -84,7 +84,13 @@ function process_single_storage( $post_id = 0, $source = '' ) {
 
 	// Update the metadata, assuming we didn't clear it out.
 	if ( ! empty( $audit_args ) ) {
+
+		// Update the whole array.
 		update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'audit_record', $audit_args );
+
+		// Set two specifics for sorting and filtering.
+		update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'storage_time', $audit_args['time'] );
+		update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'original_type', $audit_args['type'] );
 	}
 
 	// Include an action after making the change.

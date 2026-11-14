@@ -18,6 +18,7 @@ add_action( 'manage_posts_custom_column', __NAMESPACE__ . '\load_custom_column_d
 add_filter( 'manage_cold-storage_posts_columns', __NAMESPACE__ . '\modify_cs_table_columns', 999 );
 add_filter( 'post_date_column_status', __NAMESPACE__ . '\modify_storage_status', 20, 4 );
 add_filter( 'post_date_column_time', __NAMESPACE__ . '\add_storage_date_info', 20, 4 );
+add_filter( 'manage_edit-cold-storage_sortable_columns', __NAMESPACE__ . '\set_cs_sortable_columns' );
 
 /**
  * Generate the data needed for any custom columns.
@@ -29,13 +30,47 @@ add_filter( 'post_date_column_time', __NAMESPACE__ . '\add_storage_date_info', 2
  */
 function load_custom_column_data( $column_name, $post_id ) {
 
+	// Get our original post type info.
+	$org_type   = get_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'original_type', true );
+
 	// Begin the big column switch.
 	switch ( $column_name ) {
 
-		// Handle a display.
-		case 'some-weird-things' :
+		// Display original post type.
+		case 'ccs-original-type' :
 
-			// Eventually put it here.
+			// If we have one, show it nice.
+			if ( ! empty( $org_type ) ) {
+
+				// Get our label.
+				$type_objct = get_post_type_object( $org_type );
+
+				// And show the label.
+				echo esc_html( $type_objct->labels->singular_name );
+			}
+
+			// And be done.
+			break;
+
+		// Display a possible comment count.
+		case 'ccs-comm-count' :
+
+			// Check for post type support first.
+			if ( ! empty( $org_type ) && post_type_supports( $org_type, 'comments' ) ) {
+
+				// Now get our counts.
+				$get_counts = get_comment_count( absint( $post_id ) );
+
+				// Make it look like the bubble.
+				printf(
+					'<span class="ccs-table-comment-count">' .
+						'<span class="comment-count" aria-hidden="true">%s</span>' .
+						'<span class="screen-reader-text">%s</span>' .
+					'</span>',
+					$get_counts['total_comments'],
+					__( 'Total Comments', 'content-cold-storage' )
+				);
+			}
 
 			// And be done.
 			break;
@@ -52,8 +87,8 @@ function load_custom_column_data( $column_name, $post_id ) {
  * @return array            The resulting array.
  */
 function modify_cs_table_columns( $columns ) {
-	// preprint($columns, true);
-
+	//textarrprint($columns, true);
+	// Set a new empty array to return.
 	$new_columns = [];
 
 	// Loop and slip ours in.
@@ -62,13 +97,20 @@ function modify_cs_table_columns( $columns ) {
 		// First add it back.
 		$new_columns[ $index ] = $label;
 
-		// We want this after the author.
-		if ( 'author' !== $index ) {
-			continue;
+		// Add our original post type after the title.
+		if ( 'title' === $index ) {
+			$new_columns['ccs-original-type'] = esc_html__( 'Original Type', 'content-cold-storage' );
 		}
 
-		// Add our new original type column.
-		$new_columns['ccs-original-type'] = esc_html__( 'Original Type', 'content-cold-storage' );
+		// Replace the existing comments with our own.
+		if ( 'comments' === $index ) {
+
+			// Remove the existing.
+			unset( $new_columns[ $index ] );
+
+			// Add ours, which mimics the markup but drops the linking.
+			$new_columns['ccs-comm-count'] = '<span class="vers comment-grey-bubble" title="Comments" aria-hidden="true"></span><span class="screen-reader-text">Comments</span>';
+		}
 	}
 
 	// Return them.
@@ -110,20 +152,20 @@ function add_storage_date_info( $ttime, $post, $column_name, $mode ) {
 	}
 
 	// Get our cold storage info.
-	$audit  = get_post_meta( absint( $post->ID ), \Norcross\ContentColdStorage\META_PREFIX . 'audit_record', true );
+	$stored = get_post_meta( absint( $post->ID ), \Norcross\ContentColdStorage\META_PREFIX . 'storage_time', true );
 
 	// Start our new markup.
 	$build  = '';
 
 	// Assuming we have the time, show it.
-	if ( ! empty( $audit['time'] ) ) {
+	if ( ! empty( $stored ) ) {
 		$build .= sprintf(
 			/* translators: 1: Post date, 2: Post time. */
 			__( '%1$s at %2$s' ),
 			/* translators: Post date format. See https://www.php.net/manual/datetime.format.php */
-			gmdate( __( 'Y/m/d' ), $audit['time'] ),
+			gmdate( __( 'Y/m/d' ), $stored ),
 			/* translators: Post time format. See https://www.php.net/manual/datetime.format.php */
-			gmdate( __( 'g:i a' ), $audit['time'] )
+			gmdate( __( 'g:i a' ), $stored )
 		);
 	} else {
 		$build .= '<em>' . esc_html__( 'Unknown', 'content-cold-storage' ) . '</em>';
@@ -131,4 +173,29 @@ function add_storage_date_info( $ttime, $post, $column_name, $mode ) {
 
 	// Send back our new markup.
 	return $build;
+}
+
+/**
+ * Modify which columns are and are not sortable.
+ *
+ * @param  array  $columns  Our existing array.
+ *
+ * @return array            The resulting array.
+ */
+function set_cs_sortable_columns( $columns ) {
+
+	// Remove ones we don't want.
+	unset( $columns['comments'] );
+
+	// Add one for original type.
+	$columns['ccs-original-type'] = [
+		'ccs-original-type',
+		true, // Initialise with my specified order, false to disregard
+		__( 'Original Post Type' ),
+		__( 'Table ordered by original post type.' ),
+		'asc',
+	];
+
+	// Return the resulting array.
+	return $columns;
 }
