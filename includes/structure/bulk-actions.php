@@ -21,8 +21,13 @@ add_action( 'init', __NAMESPACE__ . '\manage_enabled_bulk_action_items' );
  */
 function manage_enabled_bulk_action_items() {
 
-	// Get all the post types we suppor.
+	// Get all the post types we support.
 	$enabled_types  = AdminConfig\get_enabled_post_types();
+
+	// Bail if we have none, for some reason.
+	if ( empty( $enabled_types ) ) {
+		return;
+	}
 
 	// Loop and add the filter.
 	foreach ( $enabled_types as $enabled_type ) {

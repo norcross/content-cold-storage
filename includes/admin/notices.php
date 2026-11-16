@@ -24,34 +24,88 @@ function display_admin_notices() {
 	$check_action   = filter_input( INPUT_GET, 'ccs-action', FILTER_SANITIZE_SPECIAL_CHARS );
 
 	// Only filter these on our results.
-	if ( empty( $check_action ) || ! in_array( $check_action, ['run-bulk', 'run-row'], true ) ) { // phpcs:ignore -- there is no nonce needed.
+	if ( empty( $check_action ) || ! in_array( $check_action, ['run-bulk', 'run-row', 'restore-row'], true ) ) { // phpcs:ignore -- there is no nonce needed.
 		return;
 	}
+
+	// Switch based on the action type.
+	switch ( $check_action ) {
+		case 'run-bulk' :
+			bulk_action_notice();
+			break;
+
+		case 'restore-row' :
+			single_restore_notice();
+			break;
+
+		case 'run-row' :
+			single_move_notice();
+			break;
+	}
+}
+
+/**
+ * Display the bulk action notice.
+ *
+ * @return void
+ */
+function bulk_action_notice() {
 
 	// @todo add the possible errors. this only has the success.
 
-	// Handle our bulk response first.
-	if ( 'run-bulk' === $check_action ) {
+	// Get my result count.
+	$get_count  = filter_input( INPUT_GET, 'ccs-bulk-count', FILTER_SANITIZE_NUMBER_INT );
 
-		// Get my result count.
-		$get_count  = filter_input( INPUT_GET, 'ccs-bulk-count', FILTER_SANITIZE_NUMBER_INT );
+	// Generate our success text.
+	/* translators: %d: how many were found */
+	$setup_text = sprintf( _n( 'Success! %d items was moved to cold storage.', 'Success! %d items were moved to cold content-cold-storage.', $get_count, 'content-cold-storage' ), $get_count );
 
-		// Generate our success text.
-		/* translators: %d: how many were found */
-		$setup_text = sprintf( _n( 'Success! %d items was moved to cold storage.', 'Success! %d items were moved to cold content-cold-storage.', $get_count, 'content-cold-storage' ), $get_count );
+	// And display the notice.
+	wp_admin_notice(
+		'<strong>' . esc_html( $setup_text ) . '</strong>',
+		[
+			'type'        => 'success',
+			'dismissible' => true,
+		]
+	);
 
-		// And display the notice.
-		wp_admin_notice(
-			'<strong>' . esc_html( $setup_text ) . '</strong>',
-			[
-				'type'        => 'success',
-				'dismissible' => true,
-			]
-		);
+	// And be done.
+	return;
+}
 
-		// And be done.
-		return;
-	}
+/**
+ * Display the single restore action notice.
+ *
+ * @return void
+ */
+function single_restore_notice() {
+
+	// @todo add the possible errors. this only has the success.
+
+	// Generate our success text.
+	$setup_text = esc_html__( 'Success! The selected content has been restored from cold storage.', 'content-cold-storage' );
+
+	// And display the notice.
+	wp_admin_notice(
+		'<strong>' . esc_html( $setup_text ) . '</strong>',
+		[
+			'type'        => 'success',
+			'dismissible' => true,
+		]
+	);
+
+	// And be done.
+	return;
+}
+
+/**
+ * Display the single move action notice.
+ *
+ * @return void
+ */
+function single_move_notice() {
+
+	// @todo add the possible errors. this only has the success.
 
 	// Generate our success text.
 	$setup_text = esc_html__( 'Success! The selected content was moved to cold storage.', 'content-cold-storage' );

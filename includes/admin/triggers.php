@@ -111,17 +111,16 @@ function run_single_row_move( $post_id = 0 ) {
  * @return void
  */
 function run_single_row_restore( $post_id = 0 ) {
-	wp_die('lets retore');
-	/*
+
 	// Now run it.
 	// @todo handle the error checking.
-	AdminProcess\process_single_storage( $post_id, 'row-action' );
+	AdminProcess\process_single_restore( $post_id, 'row-action' );
 
 	// Now set up the link that'll redirect.
 	$setup_args = [
-		'post_type'   => filter_input( INPUT_GET, 'ccs-post-type', FILTER_SANITIZE_SPECIAL_CHARS ),
+		'post_type'   => 'cold-storage',
 		'ccs-success' => true,
-		'ccs-action'  => 'run-row',
+		'ccs-action'  => 'restore-row',
 	];
 
 	// Get the link itself.
@@ -130,7 +129,6 @@ function run_single_row_restore( $post_id = 0 ) {
 	// Do the redirect.
 	wp_safe_redirect( $setup_link );
 	exit;
-	*/
 }
 
 /**
