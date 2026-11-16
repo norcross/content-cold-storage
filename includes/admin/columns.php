@@ -18,11 +18,11 @@ use const Norcross\ContentColdStorage\META_PREFIX;
  * Start our engines.
  */
 add_action( 'manage_posts_custom_column', __NAMESPACE__ . '\load_custom_column_data', 10, 2 );
-add_filter( 'manage_cold-storage_posts_columns', __NAMESPACE__ . '\modify_cs_table_columns', 999 );
+add_filter( 'manage_cold-storage_posts_columns', __NAMESPACE__ . '\modify_admin_table_columns', 999 );
 add_filter( 'disable_months_dropdown', __NAMESPACE__ . '\remove_date_dropdown_filter', 20, 2 );
 add_filter( 'post_date_column_status', __NAMESPACE__ . '\modify_storage_status', 20, 4 );
 add_filter( 'post_date_column_time', __NAMESPACE__ . '\add_storage_date_info', 20, 4 );
-add_filter( 'manage_edit-cold-storage_sortable_columns', __NAMESPACE__ . '\set_cs_sortable_columns' );
+add_filter( 'manage_edit-cold-storage_sortable_columns', __NAMESPACE__ . '\set_sortable_columns' );
 add_action( 'restrict_manage_posts', __NAMESPACE__ . '\include_table_filter_items', 5, 2 );
 
 // No bulk actions should exist, so remove them.
@@ -39,7 +39,10 @@ add_filter( 'bulk_actions-edit-cold-storage', '__return_false' , 30 );
 function load_custom_column_data( $column_name, $post_id ) {
 
 	// Get our original post type info.
-	$org_type   = get_post_meta( absint( $post_id ), META_PREFIX . 'original_type', true );
+	$original_type  = get_post_meta( absint( $post_id ), META_PREFIX . 'original_type', true );
+
+	// Get all the potential post statuses, as a label set.
+	$all_statuses   = get_post_stati( [], 'objects' );
 
 	// Begin the big column switch.
 	switch ( $column_name ) {
@@ -48,10 +51,10 @@ function load_custom_column_data( $column_name, $post_id ) {
 		case 'ccs-original-type' :
 
 			// If we have one, show it nice.
-			if ( ! empty( $org_type ) ) {
+			if ( ! empty( $original_type ) ) {
 
 				// Get our label.
-				$type_objct = get_post_type_object( $org_type );
+				$type_objct = get_post_type_object( $original_type );
 
 				// And show the label.
 				echo esc_html( $type_objct->labels->singular_name );
@@ -60,11 +63,26 @@ function load_custom_column_data( $column_name, $post_id ) {
 			// And be done.
 			break;
 
+		// Display original post status.
+		case 'ccs-original-status' :
+
+			// Check for the status.
+			$get_status = get_post_meta( absint( $post_id ), META_PREFIX . 'original_status', true );
+
+			// Set it.
+			$set_status = ! empty( $get_status ) ? $all_statuses[ $get_status ]->label : 'Unknown';
+
+			// And show the label.
+			echo esc_html( $set_status );
+
+			// And be done.
+			break;
+
 		// Display a possible comment count.
 		case 'ccs-comm-count' :
 
 			// Check for post type support first.
-			if ( ! empty( $org_type ) && post_type_supports( $org_type, 'comments' ) ) {
+			if ( ! empty( $original_type ) && post_type_supports( $original_type, 'comments' ) ) {
 
 				// Now get our counts.
 				$get_counts = get_comment_count( absint( $post_id ) );
@@ -72,10 +90,10 @@ function load_custom_column_data( $column_name, $post_id ) {
 				// Make it look like the bubble.
 				printf(
 					'<span class="ccs-table-comment-count">' .
-						'<span class="comment-count" aria-hidden="true">%s</span>' .
+						'<span class="comment-count" aria-hidden="true">%d</span>' .
 						'<span class="screen-reader-text">%s</span>' .
 					'</span>',
-					$get_counts['total_comments'],
+					absint( $get_counts['total_comments'] ),
 					__( 'Total Comments', 'content-cold-storage' )
 				);
 			}
@@ -94,7 +112,7 @@ function load_custom_column_data( $column_name, $post_id ) {
  *
  * @return array            The resulting array.
  */
-function modify_cs_table_columns( $columns ) {
+function modify_admin_table_columns( $columns ) {
 
 	// First remove the checkbox column.
 	unset( $columns['cb'] );
@@ -108,9 +126,10 @@ function modify_cs_table_columns( $columns ) {
 		// First add it back.
 		$new_columns[ $index ] = $label;
 
-		// Add our original post type after the title.
+		// Add our original post type and status after the title.
 		if ( 'title' === $index ) {
 			$new_columns['ccs-original-type'] = esc_html__( 'Original Type', 'content-cold-storage' );
+			$new_columns['ccs-original-status'] = esc_html__( 'Original Status', 'content-cold-storage' );
 		}
 
 		// Replace the existing comments with our own.
@@ -205,7 +224,7 @@ function add_storage_date_info( $ttime, $post, $column_name, $mode ) {
  *
  * @return array            The resulting array.
  */
-function set_cs_sortable_columns( $columns ) {
+function set_sortable_columns( $columns ) {
 
 	// Remove comments since it's not even
 	// applicable to all types shown.
@@ -217,6 +236,15 @@ function set_cs_sortable_columns( $columns ) {
 		false,
 		__( 'Original Post Type', 'content-cold-storage' ),
 		__( 'Table ordered by original post type.', 'content-cold-storage' ),
+		false,
+	];
+
+	// Add one for original status.
+	$columns['ccs-original-status'] = [
+		'ccs-original-status',
+		false,
+		__( 'Original Post Status', 'content-cold-storage' ),
+		__( 'Table ordered by original post status.', 'content-cold-storage' ),
 		false,
 	];
 
@@ -259,7 +287,7 @@ function include_table_filter_items( $post_type, $which ) {
 	// Use our custom dropdown for post statuses.
 	echo custom_filter_dropdown( [
 		'show_option_all' => __( 'All Statuses', 'content-cold-storage' ),
-		'name'            => 'cs_original_type',
+		'name'            => 'cs_original_status',
 		'selected'        => filter_input( INPUT_GET, 'cs_original_status', FILTER_SANITIZE_SPECIAL_CHARS ),
 		'dataset'         => original_status_dropdown_data(),
 	] );

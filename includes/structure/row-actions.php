@@ -33,6 +33,31 @@ function add_cold_storage_row_action( array $actions, \WP_Post $post ) {
 		return $actions;
 	}
 
+	// If we are on cold storage, add a restore.
+	if ( ! empty( $post->post_type ) && 'cold-storage' === $post->post_type ) {
+
+		// Define our args for the link.
+		$setup_args = [
+			'ccs-action'    => 'ccs-single-restore',
+			'ccs-post-id'   => $post->ID,
+			'ccs-nonce'     => wp_create_nonce( NONCE_PREFIX . 'cold_store_row' ),
+		];
+
+		// Build our link.
+		$setup_link = add_query_arg( $setup_args, admin_url( '/' ) );
+
+		// And include our action.
+		$actions['ccs-add-cold'] = sprintf(
+			'<a class="ccs-action-row-link ccs-cold-store-row-link" href="%1$s" rel="bookmark" title="%2$s" aria-label="%2$s">%3$s</a>',
+			esc_url( $setup_link ),
+			esc_attr__( 'Restore this content to the original location.', 'content-cold-storage' ),
+			esc_html__( 'Restore', 'content-cold-storage' )
+		);
+
+		// And send it back.
+		return $actions;
+	}
+
 	// Only do this on post types we support.
 	if ( empty( $post->post_type ) || ! in_array( $post->post_type, AdminConfig\get_enabled_post_types(), true ) ) {
 		return $actions;

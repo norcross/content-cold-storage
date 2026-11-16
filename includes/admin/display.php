@@ -132,17 +132,38 @@ function manage_admin_table_display( $query ) {
 		return;
 	}
 
+	// Set the possible meta args.
+	$meta_query_args = [];
+
 	// If we have an original type filter being passed, handle it.
-	if ( ! empty( $query->get( 'original_type' ) ) ) {
+	if ( ! empty( $query->get( 'cs_original_type' ) ) ) {
 
 		// Set the args for a query.
-		$meta_query_args = [
-			[
-				'key'     => META_PREFIX . 'original_type',
-				'value'   => esc_attr( $query->get( 'original_type' ) ),
-				'compare' => '=',
-			],
+		$meta_query_args[] = [
+			'key'     => META_PREFIX . 'original_type',
+			'value'   => esc_attr( $query->get( 'cs_original_type' ) ),
+			'compare' => '=',
 		];
+	}
+
+	// If we have an original status filter being passed, handle it.
+	if ( ! empty( $query->get( 'cs_original_status' ) ) ) {
+
+		// Set the args for a query.
+		$meta_query_args[] = [
+			'key'     => META_PREFIX . 'original_status',
+			'value'   => esc_attr( $query->get( 'cs_original_status' ) ),
+			'compare' => '=',
+		];
+	}
+
+	// Now add the potential meta query data.
+	if ( ! empty( $meta_query_args ) ) {
+
+		// Include the relation if we have more than one.
+		if ( count( $meta_query_args ) > 1 ) {
+			$meta_query_args['relation'] = 'AND';
+		}
 
 		// Now add this to the larger array.
 		$query->set( 'meta_query', $meta_query_args ); // phpcs:ignore -- this is a required meta query.
@@ -157,6 +178,12 @@ function manage_admin_table_display( $query ) {
 		// Our original post type.
 		case 'ccs-original-type' :
 			$query->set( 'meta_key', META_PREFIX . 'original_type' );
+			$query->set( 'orderby', 'meta_value' );
+			break;
+
+		// Our original post status.
+		case 'ccs-original-status' :
+			$query->set( 'meta_key', META_PREFIX . 'original_status' );
 			$query->set( 'orderby', 'meta_value' );
 			break;
 

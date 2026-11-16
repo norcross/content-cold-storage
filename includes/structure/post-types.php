@@ -36,6 +36,7 @@ function register_cold_storage_post_type() {
 		'singular_name' => _x( 'Cold Storage', 'Post Type Singular Name', 'content-cold-storage' ),
 		'menu_name'     => __( 'Cold Storage', 'content-cold-storage' ),
 		'search_items'  => __( 'Search Cold Storage', 'content-cold-storage' ),
+		'not_found'     => __( 'No cold storage items found.', 'content-cold-storage' ),
 	];
 
 	// Now set up the arguments.
