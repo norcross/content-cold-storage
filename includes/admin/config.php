@@ -13,6 +13,7 @@ namespace Norcross\ContentColdStorage\Admin\Config;
  */
 add_filter( 'plugins_api', __NAMESPACE__ . '\prevent_plugin_update_check', 100, 3 );
 add_filter( 'removable_query_args', __NAMESPACE__ . '\admin_removable_args' );
+add_filter( 'query_vars', __NAMESPACE__ . '\register_admin_filter_vars', 1 );
 
 /**
  * Prevent the WP plugin update check from looking at this one.
@@ -122,4 +123,20 @@ function get_excluded_post_ids() {
 
 	// Now send it back with all the integers.
 	return array_map( 'absint', $set_excluded );
+}
+
+/**
+ * Register special query vars for the original type so we can filter.
+ *
+ * @param  $qvars array The array of allowed query variable names.
+ *
+ * @return array
+ */
+function register_admin_filter_vars( $qvars ) {
+
+	// Add our new vars.
+	$qvars[] = 'cs_original_type';
+
+	// Return the updated array.
+	return $qvars;
 }

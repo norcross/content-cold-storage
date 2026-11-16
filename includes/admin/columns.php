@@ -20,6 +20,7 @@ add_filter( 'disable_months_dropdown', __NAMESPACE__ . '\remove_date_dropdown_fi
 add_filter( 'post_date_column_status', __NAMESPACE__ . '\modify_storage_status', 20, 4 );
 add_filter( 'post_date_column_time', __NAMESPACE__ . '\add_storage_date_info', 20, 4 );
 add_filter( 'manage_edit-cold-storage_sortable_columns', __NAMESPACE__ . '\set_cs_sortable_columns' );
+add_action( 'restrict_manage_posts', __NAMESPACE__ . '\include_table_filter_items', 5, 2 );
 
 // No bulk actions should exist, so remove them.
 add_filter( 'bulk_actions-edit-cold-storage', '__return_false' , 30 );
@@ -203,18 +204,95 @@ function add_storage_date_info( $ttime, $post, $column_name, $mode ) {
  */
 function set_cs_sortable_columns( $columns ) {
 
-	// Remove ones we don't want.
+	// Remove comments since it's not even
+	// applicable to all types shown.
 	unset( $columns['comments'] );
 
 	// Add one for original type.
 	$columns['ccs-original-type'] = [
 		'ccs-original-type',
 		false,
-		__( 'Original Post Type' ),
-		__( 'Table ordered by original post type.' ),
-		'desc',
+		__( 'Original Post Type', 'content-cold-storage' ),
+		__( 'Table ordered by original post type.', 'content-cold-storage' ),
+		false,
 	];
 
 	// Return the resulting array.
 	return $columns;
+}
+
+/**
+ * Add additional dropdown filter options for cold storage.
+ *
+ * @param  string $post_type  What post type we're on.
+ * @param  string $which      The top or bottom.
+ *
+ * @return HTML
+ */
+function include_table_filter_items( $post_type, $which ) {
+
+	// Don't attempt to do this on other post types.
+	if ( empty( $post_type ) || 'cold-storage' !== $post_type ) {
+		return;
+	}
+
+	// Check for a selected author or post type.
+	$check_author   = filter_input( INPUT_GET, 'author', FILTER_SANITIZE_NUMBER_INT );
+	$check_posttype = filter_input( INPUT_GET, 'original_type', FILTER_SANITIZE_SPECIAL_CHARS );
+
+	// And use the native dropdown for users.
+	wp_dropdown_users( [
+		'show_option_all'  => __( 'All Authors', 'content-cold-storage' ),
+		'show'             => 'display_name_with_login',
+		'name'             => 'author',
+		'selected'         => $check_author,
+		'include_selected' => true,
+	] );
+
+	// Since this one is messy, abstract it.
+	echo post_type_filter_dropdown( [
+		'show_option_all' => __( 'All Post Types', 'content-cold-storage' ),
+		'name'            => 'cs_original_type',
+		'selected'        => $check_posttype,
+	] );
+
+	// No additional items.
+}
+
+/**
+ * Show a dropdown of all the available post types.
+ *
+ * @param  array $dropdown_args  Args mimicking the way WP does it.
+ *
+ * @return string
+ */
+function post_type_filter_dropdown( $dropdown_args = [] ) {
+
+	// First get the types.
+	$all_types  = AdminConfig\get_enabled_post_types();
+
+	// Begin our markup.
+	$build  = '';
+
+	// Set our select tag.
+	$build .= '<select name="' . esc_attr( $dropdown_args['name'] ) . '" id="' . esc_attr( $dropdown_args['name'] ) . '" class="postform">';
+
+		// Include the "all" option.
+		$build .= '<option value="">' . esc_html( $dropdown_args['show_option_all'] ) . '</option>';
+
+		// Now loop all the types.
+		foreach ( $all_types as $post_type ) {
+
+			// Get our label.
+			$type_objct = get_post_type_object( $post_type );
+
+			// And set the option.
+			$build .= '<option value="' . esc_attr( $post_type ) . '" ' . selected( $dropdown_args['selected'], $post_type, false ) . '>' . esc_html( $type_objct->labels->name ) . '</option>';
+		}
+
+	// Close the select tag.
+	$build .= '</select>';
+
+	// Send back the build.
+	return $build;
 }

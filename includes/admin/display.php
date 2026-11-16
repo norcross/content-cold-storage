@@ -16,7 +16,7 @@ use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
  */
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_cs_admin_css' );
 add_action( 'admin_menu', __NAMESPACE__ . '\modify_admin_menu', 11 );
-add_action( 'pre_get_posts', __NAMESPACE__ . '\manage_admin_table_sort', 10 );
+add_action( 'pre_get_posts', __NAMESPACE__ . '\manage_admin_table_display', 10 );
 
 /**
  * Add some CSS to make our row action
@@ -28,6 +28,14 @@ function load_cs_admin_css() {
 
 	// Set my CSS up.
 	$setup_css  = '
+
+		body.post-type-cold-storage .wp-list-table thead th.column-title a {
+			padding-left: 12px;
+		}
+
+		body.post-type-cold-storage .wp-list-table tbody th.column-title {
+			padding-left: 14px;
+		}
 
 		.column-ccs-comm-count {
 			width: 60px;
@@ -99,13 +107,13 @@ function modify_admin_menu() {
 }
 
 /**
- * Handle the sorting of the cold storage table.
+ * Handle the sorting and filtering of the cold storage table.
  *
  * @param  WP_Query $query  The query object.
  *
  * @return void
  */
-function manage_admin_table_sort( $query ) {
+function manage_admin_table_display( $query ) {
 
 	// Run this on admin only.
 	if ( ! is_admin() || ! $query->is_main_query() ) {
@@ -117,7 +125,23 @@ function manage_admin_table_sort( $query ) {
 		return;
 	}
 
-	// Check each one we know.
+	// If we have an original type filter being passed, handle it.
+	if ( ! empty( $query->get( 'original_type' ) ) ) {
+
+		// Set the args for a query.
+		$meta_query_args = [
+			[
+				'key'     => \Norcross\ContentColdStorage\META_PREFIX . 'original_type',
+				'value'   => esc_attr( $query->get( 'original_type' ) ),
+				'compare' => '=',
+			],
+		];
+
+		// Now add this to the larger array.
+		$query->set( 'meta_query', $meta_query_args ); // phpcs:ignore -- this is a required meta query.
+	}
+
+	// Swing through and set our order up.
 	switch ( $query->get( 'orderby' ) ) {
 
 		// Our original post type.
