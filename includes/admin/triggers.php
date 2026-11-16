@@ -10,6 +10,10 @@ namespace Norcross\ContentColdStorage\Admin\Triggers;
 
 // Set our aliases.
 use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
+use Norcross\ContentColdStorage\Admin\Process as AdminProcess;
+
+// And any functions or constants on their own.
+use const Norcross\ContentColdStorage\NONCE_PREFIX;
 
 /**
  * Start our engines.
@@ -41,7 +45,7 @@ function run_enabled_row_processing() {
 	$confirm_nonce  = filter_input( INPUT_GET, 'ccs-nonce', FILTER_SANITIZE_SPECIAL_CHARS );
 
 	// Handle the nonce check and die if there is a failure.
-	if ( empty( $confirm_nonce ) || ! wp_verify_nonce( $confirm_nonce, \Norcross\ContentColdStorage\NONCE_PREFIX . 'cold_store_row' ) ) {
+	if ( empty( $confirm_nonce ) || ! wp_verify_nonce( $confirm_nonce, NONCE_PREFIX . 'cold_store_row' ) ) {
 		wp_die( esc_html__( 'There was an error validating the nonce.', 'content-cold-storage' ), esc_html__( 'Content Cold Storage', 'content-cold-storage' ), [ 'back_link' => true ] );
 	}
 
@@ -55,7 +59,7 @@ function run_enabled_row_processing() {
 
 	// Now run it.
 	// @todo handle the error checking.
-	\Norcross\ContentColdStorage\Admin\Process\process_single_storage( $get_post_id, 'row-action' );
+	AdminProcess\process_single_storage( $get_post_id, 'row-action' );
 
 	// Now set up the link that'll redirect.
 	$setup_args = [
@@ -120,7 +124,7 @@ function run_enabled_bulk_actions( $sendback, $action, $post_ids ) {
 	// Now loop and process each one.
 	// @todo include some error handling.
 	foreach ( $post_ids as $post_id ) {
-		\Norcross\ContentColdStorage\Admin\Process\process_single_storage( $post_id, 'bulk-action' );
+		AdminProcess\process_single_storage( $post_id, 'bulk-action' );
 	}
 
 	// Set the return args to include.

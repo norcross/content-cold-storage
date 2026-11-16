@@ -11,6 +11,9 @@ namespace Norcross\ContentColdStorage\Admin\Display;
 // Set our aliases.
 use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
 
+// And any functions or constants on their own.
+use const Norcross\ContentColdStorage\META_PREFIX;
+
 /**
  * Start our engines.
  */
@@ -35,6 +38,10 @@ function load_cs_admin_css() {
 
 		body.post-type-cold-storage .wp-list-table tbody th.column-title {
 			padding-left: 14px;
+		}
+
+		select.cs-admin-table-filter-form {
+			min-width: 160px;
 		}
 
 		.column-ccs-comm-count {
@@ -131,7 +138,7 @@ function manage_admin_table_display( $query ) {
 		// Set the args for a query.
 		$meta_query_args = [
 			[
-				'key'     => \Norcross\ContentColdStorage\META_PREFIX . 'original_type',
+				'key'     => META_PREFIX . 'original_type',
 				'value'   => esc_attr( $query->get( 'original_type' ) ),
 				'compare' => '=',
 			],
@@ -141,24 +148,21 @@ function manage_admin_table_display( $query ) {
 		$query->set( 'meta_query', $meta_query_args ); // phpcs:ignore -- this is a required meta query.
 	}
 
+	// Set the orderby with the fallback so we don't bork other sorts.
+	$set_orderbyarg = ! empty( $query->get( 'orderby' ) ) ? $query->get( 'orderby' ) : 'date';
+
 	// Swing through and set our order up.
-	switch ( $query->get( 'orderby' ) ) {
+	switch ( $set_orderbyarg ) {
 
 		// Our original post type.
 		case 'ccs-original-type' :
-			$query->set( 'meta_key', \Norcross\ContentColdStorage\META_PREFIX . 'original_type' );
+			$query->set( 'meta_key', META_PREFIX . 'original_type' );
 			$query->set( 'orderby', 'meta_value' );
 			break;
 
 		// Hijacking the date sort to use our storage time.
 		case 'date' :
-			$query->set( 'meta_key', \Norcross\ContentColdStorage\META_PREFIX . 'storage_time' );
-			$query->set( 'orderby', 'meta_value_num' );
-			break;
-
-		// Doing the same as above, since we want date as the default.
-		default :
-			$query->set( 'meta_key', \Norcross\ContentColdStorage\META_PREFIX . 'storage_time' );
+			$query->set( 'meta_key', META_PREFIX . 'storage_time' );
 			$query->set( 'orderby', 'meta_value_num' );
 			break;
 	}

@@ -11,6 +11,9 @@ namespace Norcross\ContentColdStorage\Structure\PostTypes;
 // Set our aliases.
 use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
 
+// And any functions or constants on their own.
+use const Norcross\ContentColdStorage\ACTION_PREFIX;
+
 /**
  * Start our engines.
  */
@@ -29,10 +32,10 @@ function register_cold_storage_post_type() {
 
 	// Define our labels.
 	$set_label_args = [
-		'name'                  => _x( 'Cold Storage', 'Post Type General Name', 'content-cold-storage' ),
-		'singular_name'         => _x( 'Cold Storage', 'Post Type Singular Name', 'content-cold-storage' ),
-		'menu_name'             => __( 'Cold Storage', 'content-cold-storage' ),
-		'search_items'          => __( 'Search Cold Storage', 'content-cold-storage' ),
+		'name'          => _x( 'Cold Storage', 'Post Type General Name', 'content-cold-storage' ),
+		'singular_name' => _x( 'Cold Storage', 'Post Type Singular Name', 'content-cold-storage' ),
+		'menu_name'     => __( 'Cold Storage', 'content-cold-storage' ),
+		'search_items'  => __( 'Search Cold Storage', 'content-cold-storage' ),
 	];
 
 	// Now set up the arguments.
@@ -95,7 +98,7 @@ function restrict_cold_storage_access() {
 	}
 
 	// Set our default redirect link with a filter.
-	$setup_redirect = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'front_redirect_url', home_url( '/' ) );
+	$setup_redirect = apply_filters( ACTION_PREFIX . 'front_redirect_url', home_url( '/' ) );
 
 	// We met all the criteria, so redirect.
 	wp_safe_redirect( esc_url( $setup_redirect ), 302 );

@@ -9,6 +9,9 @@ namespace Norcross\ContentColdStorage\Structure\RowActions;
 // Set our aliases.
 use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
 
+// And any functions or constants on their own.
+use const Norcross\ContentColdStorage\NONCE_PREFIX;
+
 /**
  * Start our engines.
  */
@@ -58,7 +61,7 @@ function add_cold_storage_row_action( array $actions, \WP_Post $post ) {
 		'ccs-action'    => 'ccs-single-run',
 		'ccs-post-id'   => $post->ID,
 		'ccs-post-type' => $post->post_type,
-		'ccs-nonce'     => wp_create_nonce( \Norcross\ContentColdStorage\NONCE_PREFIX . 'cold_store_row' ),
+		'ccs-nonce'     => wp_create_nonce( NONCE_PREFIX . 'cold_store_row' ),
 	];
 
 	// Build our link.

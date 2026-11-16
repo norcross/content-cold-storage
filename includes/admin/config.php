@@ -8,6 +8,9 @@
 // Declare our namespace.
 namespace Norcross\ContentColdStorage\Admin\Config;
 
+// And any functions or constants on their own.
+use const Norcross\ContentColdStorage\ACTION_PREFIX;
+
 /**
  * Start our engines.
  */
@@ -68,7 +71,7 @@ function admin_removable_args( $args ) {
  * @return array  An array of all post types are allowed.
  */
 function get_enabled_post_types() {
-	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'enabled_post_types', ['post','page'] );
+	return apply_filters( ACTION_PREFIX . 'enabled_post_types', ['post','page'] );
 }
 
 /**
@@ -77,7 +80,7 @@ function get_enabled_post_types() {
  * @return array  The array of statuses.
  */
 function get_enabled_post_statuses() {
-	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'enabled_post_statuses', ['draft','publish','future','pending'] );
+	return apply_filters( ACTION_PREFIX . 'enabled_post_statuses', ['draft','publish','future','pending'] );
 }
 
 /**
@@ -86,7 +89,7 @@ function get_enabled_post_statuses() {
  * @return string
  */
 function get_required_user_cap() {
-	return apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'required_user_cap', 'edit_others_posts' );
+	return apply_filters( ACTION_PREFIX . 'required_user_cap', 'edit_others_posts' );
 }
 
 /**
@@ -119,7 +122,7 @@ function get_excluded_post_ids() {
 	}
 
 	// Set it get filtered first.
-	$set_excluded   = apply_filters( \Norcross\ContentColdStorage\ACTION_PREFIX . 'excluded_post_ids', $set_excluded );
+	$set_excluded   = apply_filters( ACTION_PREFIX . 'excluded_post_ids', $set_excluded );
 
 	// Now send it back with all the integers.
 	return array_map( 'absint', $set_excluded );
@@ -136,6 +139,7 @@ function register_admin_filter_vars( $qvars ) {
 
 	// Add our new vars.
 	$qvars[] = 'cs_original_type';
+	$qvars[] = 'cs_original_status';
 
 	// Return the updated array.
 	return $qvars;

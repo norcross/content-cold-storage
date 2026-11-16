@@ -11,6 +11,9 @@ namespace Norcross\ContentColdStorage\Admin\Columns;
 // Set our aliases.
 use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
 
+// And any functions or constants on their own.
+use const Norcross\ContentColdStorage\META_PREFIX;
+
 /**
  * Start our engines.
  */
@@ -36,7 +39,7 @@ add_filter( 'bulk_actions-edit-cold-storage', '__return_false' , 30 );
 function load_custom_column_data( $column_name, $post_id ) {
 
 	// Get our original post type info.
-	$org_type   = get_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'original_type', true );
+	$org_type   = get_post_meta( absint( $post_id ), META_PREFIX . 'original_type', true );
 
 	// Begin the big column switch.
 	switch ( $column_name ) {
@@ -172,7 +175,7 @@ function add_storage_date_info( $ttime, $post, $column_name, $mode ) {
 	}
 
 	// Get our cold storage info.
-	$stored = get_post_meta( absint( $post->ID ), \Norcross\ContentColdStorage\META_PREFIX . 'storage_time', true );
+	$stored = get_post_meta( absint( $post->ID ), META_PREFIX . 'storage_time', true );
 
 	// Start our new markup.
 	$build  = '';
@@ -236,58 +239,62 @@ function include_table_filter_items( $post_type, $which ) {
 		return;
 	}
 
-	// Check for a selected author or post type.
-	$check_author   = filter_input( INPUT_GET, 'author', FILTER_SANITIZE_NUMBER_INT );
-	$check_posttype = filter_input( INPUT_GET, 'original_type', FILTER_SANITIZE_SPECIAL_CHARS );
-
 	// And use the native dropdown for users.
 	wp_dropdown_users( [
 		'show_option_all'  => __( 'All Authors', 'content-cold-storage' ),
 		'show'             => 'display_name_with_login',
 		'name'             => 'author',
-		'selected'         => $check_author,
+		'selected'         => filter_input( INPUT_GET, 'author', FILTER_SANITIZE_NUMBER_INT ),
 		'include_selected' => true,
 	] );
 
-	// Since this one is messy, abstract it.
-	echo post_type_filter_dropdown( [
-		'show_option_all' => __( 'All Post Types', 'content-cold-storage' ),
+	// Use our custom dropdown for post types.
+	echo custom_filter_dropdown( [
+		'show_option_all' => __( 'All Types', 'content-cold-storage' ),
 		'name'            => 'cs_original_type',
-		'selected'        => $check_posttype,
+		'selected'        => filter_input( INPUT_GET, 'cs_original_type', FILTER_SANITIZE_SPECIAL_CHARS ),
+		'dataset'         => original_type_dropdown_data(),
+	] );
+
+	// Use our custom dropdown for post statuses.
+	echo custom_filter_dropdown( [
+		'show_option_all' => __( 'All Statuses', 'content-cold-storage' ),
+		'name'            => 'cs_original_type',
+		'selected'        => filter_input( INPUT_GET, 'cs_original_status', FILTER_SANITIZE_SPECIAL_CHARS ),
+		'dataset'         => original_status_dropdown_data(),
 	] );
 
 	// No additional items.
 }
 
 /**
- * Show a dropdown of all the available post types.
+ * Show a dropdown of one of our custom filters.
  *
- * @param  array $dropdown_args  Args mimicking the way WP does it.
+ * @param  array  $dropdown_args  Args mimicking the way WP does it.
  *
  * @return string
  */
-function post_type_filter_dropdown( $dropdown_args = [] ) {
+function custom_filter_dropdown( $dropdown_args = [] ) {
 
-	// First get the types.
-	$all_types  = AdminConfig\get_enabled_post_types();
+	// Bail without data.
+	if ( empty( $dropdown_args['dataset'] ) ) {
+		return;
+	}
 
 	// Begin our markup.
 	$build  = '';
 
 	// Set our select tag.
-	$build .= '<select name="' . esc_attr( $dropdown_args['name'] ) . '" id="' . esc_attr( $dropdown_args['name'] ) . '" class="postform">';
+	$build .= '<select name="' . esc_attr( $dropdown_args['name'] ) . '" id="' . esc_attr( $dropdown_args['name'] ) . '" class="postform cs-admin-table-filter-form">';
 
 		// Include the "all" option.
 		$build .= '<option value="">' . esc_html( $dropdown_args['show_option_all'] ) . '</option>';
 
 		// Now loop all the types.
-		foreach ( $all_types as $post_type ) {
-
-			// Get our label.
-			$type_objct = get_post_type_object( $post_type );
+		foreach ( $dropdown_args['dataset'] as $data_key => $data_label ) {
 
 			// And set the option.
-			$build .= '<option value="' . esc_attr( $post_type ) . '" ' . selected( $dropdown_args['selected'], $post_type, false ) . '>' . esc_html( $type_objct->labels->name ) . '</option>';
+			$build .= '<option value="' . esc_attr( $data_key ) . '" ' . selected( $dropdown_args['selected'], $data_key, false ) . '>' . esc_html( $data_label ) . '</option>';
 		}
 
 	// Close the select tag.
@@ -295,4 +302,68 @@ function post_type_filter_dropdown( $dropdown_args = [] ) {
 
 	// Send back the build.
 	return $build;
+}
+
+/**
+ * Build the data for the original post type dropdown filter.
+ *
+ * @return array
+ */
+function original_type_dropdown_data() {
+
+	// First get the types.
+	$allowed_types  = AdminConfig\get_enabled_post_types();
+
+	// If none (weird, but OK) or only 1 exist, no need for filtering.
+	if ( empty( $allowed_types ) || 1 === count( $allowed_types ) ) {
+		return [];
+	}
+
+	// Set the empty.
+	$dataset = [];
+
+	// Now loop and build.
+	foreach ( $allowed_types as $post_type ) {
+
+		// Get the post type object.
+		$type_objct = get_post_type_object( $post_type );
+
+		// Add our label.
+		$dataset[ $post_type ] = $type_objct->labels->name;
+	}
+
+	// Send back the data.
+	return $dataset;
+}
+
+/**
+ * Build the data for the original post type dropdown filter.
+ *
+ * @return array
+ */
+function original_status_dropdown_data() {
+
+	// First get the statuses.
+	$allowed_stats  = AdminConfig\get_enabled_post_statuses();
+
+	// If none (weird, but OK) or only 1 exist, no need for filtering.
+	if ( empty( $allowed_stats ) || 1 === count( $allowed_stats ) ) {
+		return [];
+	}
+
+	// Get all the potential post statuses, as a label set.
+	$all_statuses   = get_post_stati( [], 'objects' );
+
+	// Set the empty.
+	$dataset = [];
+
+	// Now loop and build.
+	foreach ( $allowed_stats as $post_status ) {
+
+		// Add our label.
+		$dataset[ $post_status ] = $all_statuses[ $post_status ]->label;
+	}
+
+	// Send back the data.
+	return $dataset;
 }
