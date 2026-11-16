@@ -61,6 +61,7 @@ function process_single_storage( $post_id = 0, $source = '' ) {
 		'post_type'   => 'cold-storage',
 		'post_name'   => 'cs-' . strtotime( $setup_post->post_date ),
 		'post_status' => 'publish',
+		'post_parent' => 0,
 	];
 
 	// Allow a filter of the setup args here.
@@ -119,7 +120,7 @@ function process_single_restore( $post_id = 0, $source = '' ) {
 		absint( $setup_post->ID ),
 		$get_audit_meta['status'],
 		$get_audit_meta['type'],
-		$setup_post->post_parent
+		absint( $get_audit_meta['parent'] )
 	);
 
 	// Set the args for updating the post.
@@ -172,6 +173,7 @@ function set_storage_metadata( $setup_post, $source ) {
 		'type'   => $setup_post->post_type,
 		'slug'   => $setup_post->post_name,
 		'status' => $setup_post->post_status,
+		'parent' => $setup_post->post_parent,
 	];
 
 	// Allow a filter of the audit args here.
