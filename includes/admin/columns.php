@@ -16,9 +16,13 @@ use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
  */
 add_action( 'manage_posts_custom_column', __NAMESPACE__ . '\load_custom_column_data', 10, 2 );
 add_filter( 'manage_cold-storage_posts_columns', __NAMESPACE__ . '\modify_cs_table_columns', 999 );
+add_filter( 'disable_months_dropdown', __NAMESPACE__ . '\remove_date_dropdown_filter', 20, 2 );
 add_filter( 'post_date_column_status', __NAMESPACE__ . '\modify_storage_status', 20, 4 );
 add_filter( 'post_date_column_time', __NAMESPACE__ . '\add_storage_date_info', 20, 4 );
 add_filter( 'manage_edit-cold-storage_sortable_columns', __NAMESPACE__ . '\set_cs_sortable_columns' );
+
+// No bulk actions should exist, so remove them.
+add_filter( 'bulk_actions-edit-cold-storage', '__return_false' , 30 );
 
 /**
  * Generate the data needed for any custom columns.
@@ -87,7 +91,10 @@ function load_custom_column_data( $column_name, $post_id ) {
  * @return array            The resulting array.
  */
 function modify_cs_table_columns( $columns ) {
-	//textarrprint($columns, true);
+
+	// First remove the checkbox column.
+	unset( $columns['cb'] );
+
 	// Set a new empty array to return.
 	$new_columns = [];
 
@@ -115,6 +122,18 @@ function modify_cs_table_columns( $columns ) {
 
 	// Return them.
 	return $new_columns;
+}
+
+/**
+ * Remove the date dropdown since that ignores storage date.
+ *
+ * @param  boolean $disable    Whether to disable the drop-down. Default false.
+ * @param  string  $post_type  What post type we're looking at.
+ *
+ * @return boolean
+ */
+function remove_date_dropdown_filter( $disable, $post_type ) {
+	return 'cold-storage' !== $post_type ? $disable : true;
 }
 
 /**
@@ -190,7 +209,7 @@ function set_cs_sortable_columns( $columns ) {
 	// Add one for original type.
 	$columns['ccs-original-type'] = [
 		'ccs-original-type',
-		true, // Initialise with my specified order, false to disregard
+		false,
 		__( 'Original Post Type' ),
 		__( 'Table ordered by original post type.' ),
 		'desc',

@@ -71,6 +71,30 @@ function modify_admin_menu() {
 		remove_menu_page( 'edit.php?post_type=cold-storage' );
 	}
 
+	// Call the global.
+	global $submenu;
+
+	// Begin looping the submenu, since we can't remove the term pages another way.
+	foreach ( $submenu as $parent_menu => $menu_args ) {
+
+		// Only target our menu.
+		if ( 'edit.php?post_type=cold-storage' !== $parent_menu ) {
+			continue;
+		}
+
+		// Now loop the menu args to remove all but what we want.
+		foreach ( $menu_args as $sub_key => $sub_args ) {
+
+			// 5 is our important one, so leave that there.
+			if ( 5 === absint( $sub_key ) ) {
+				continue;
+			}
+
+			// Remove whatever this is, which is likely a taxonomy.
+			unset( $submenu[ $parent_menu ][ $sub_key ] );
+		}
+	}
+
 	// Nothing left inside this.
 }
 

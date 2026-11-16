@@ -16,9 +16,6 @@ use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
  */
 add_action( 'init', __NAMESPACE__ . '\manage_enabled_bulk_action_items' );
 
-// No bulk actions should exist, so remove them.
-add_filter( 'bulk_actions-edit-cold-storage', '__return_false' , 30 );
-
 /**
  * Add the bulk actions to an applicable dropdowns.
  */
