@@ -3,5 +3,6 @@ A process to archive old WP content and remove it from all public viewing withou
 
 
 ### To Do
+- add error reporting to admin notice
 - easier method to restore content
 - media support
