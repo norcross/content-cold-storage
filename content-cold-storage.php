@@ -3,7 +3,7 @@
  * Plugin Name:      Content Cold Storage
  * Plugin URI:       https://github.com/norcross/content-cold-storage
  * Description:      A process to archive old WP content and remove it from all public viewing.
- * Version:          0.0.1
+ * Version:          0.0.2
  * Author:           Andrew Norcross
  * Author URI:       https://andrewnorcross.com/
  * Text Domain:      content-cold-storage
@@ -24,7 +24,7 @@ use WP_CLI;
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Define our plugin version.
-define( __NAMESPACE__ . '\VERS', '0.0.1' );
+define( __NAMESPACE__ . '\VERS', '0.0.2' );
 
 // Set a few prefixes.
 define( __NAMESPACE__ . '\ACTION_PREFIX', 'ccs_' );
