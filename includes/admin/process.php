@@ -77,6 +77,7 @@ function process_single_storage( $post_id = 0, $source = '' ) {
 		'time'   => time(),
 		'type'   => $setup_post->post_type,
 		'slug'   => $setup_post->post_name,
+		'status' => $setup_post->post_status,
 	];
 
 	// Allow a filter of the audit args here.
@@ -88,9 +89,10 @@ function process_single_storage( $post_id = 0, $source = '' ) {
 		// Update the whole array.
 		update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'audit_record', $audit_args );
 
-		// Set two specifics for sorting and filtering.
+		// Set the specifics for sorting and filtering.
 		update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'storage_time', $audit_args['time'] );
 		update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'original_type', $audit_args['type'] );
+		update_post_meta( absint( $post_id ), \Norcross\ContentColdStorage\META_PREFIX . 'original_status', $audit_args['status'] );
 	}
 
 	// Include an action after making the change.

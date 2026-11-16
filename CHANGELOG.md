@@ -10,4 +10,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ##[0.0.2]
 
-* Cleanup and better controls
+* Adding additional sort and filter options
+* Removing bulk actions (for now)
+* Displaying comments when supported by the post type
