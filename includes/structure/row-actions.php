@@ -12,18 +12,18 @@ use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
 /**
  * Start our engines.
  */
-add_action( 'post_row_actions', __NAMESPACE__ . '\add_cold_storage_row_actions', 50, 2);
-add_action( 'page_row_actions', __NAMESPACE__ . '\add_cold_storage_row_actions', 50, 2);
+add_action( 'post_row_actions', __NAMESPACE__ . '\add_cold_storage_row_action', 50, 2 );
+add_action( 'page_row_actions', __NAMESPACE__ . '\add_cold_storage_row_action', 50, 2 );
 
 /**
- * Include the post and page row actions to set up a workflow clone.
+ * Include the post and page row action to move an item to cold storage.
  *
  * @param  array   $actions  The current array of actions.
  * @param  WP_Post $post     The WP_Post object.
  *
  * @return array
  */
-function add_cold_storage_row_actions( array $actions, \WP_Post $post ) {
+function add_cold_storage_row_action( array $actions, \WP_Post $post ) {
 
 	// Don't show this for users who can't.
 	if ( ! current_user_can( AdminConfig\get_required_user_cap() ) ) {

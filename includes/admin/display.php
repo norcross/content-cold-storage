@@ -16,6 +16,7 @@ use Norcross\ContentColdStorage\Admin\Config as AdminConfig;
  */
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_cs_admin_css' );
 add_action( 'admin_menu', __NAMESPACE__ . '\modify_admin_menu', 11 );
+add_action( 'pre_get_posts', __NAMESPACE__ . '\manage_admin_table_sort', 10 );
 
 /**
  * Add some CSS to make our row action
@@ -71,4 +72,48 @@ function modify_admin_menu() {
 	}
 
 	// Nothing left inside this.
+}
+
+/**
+ * Handle the sorting of the cold storage table.
+ *
+ * @param  WP_Query $query  The query object.
+ *
+ * @return void
+ */
+function manage_admin_table_sort( $query ) {
+
+	// Run this on admin only.
+	if ( ! is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	// Only do this on cold storage.
+	if ( empty( $query->get( 'post_type' ) ) || 'cold-storage' !== sanitize_text_field( $query->get( 'post_type' ) ) ) {
+		return;
+	}
+
+	// Check each one we know.
+	switch ( $query->get( 'orderby' ) ) {
+
+		// Our original post type.
+		case 'ccs-original-type' :
+			$query->set( 'meta_key', \Norcross\ContentColdStorage\META_PREFIX . 'original_type' );
+			$query->set( 'orderby', 'meta_value' );
+			break;
+
+		// Hijacking the date sort to use our storage time.
+		case 'date' :
+			$query->set( 'meta_key', \Norcross\ContentColdStorage\META_PREFIX . 'storage_time' );
+			$query->set( 'orderby', 'meta_value_num' );
+			break;
+
+		// Doing the same as above, since we want date as the default.
+		default :
+			$query->set( 'meta_key', \Norcross\ContentColdStorage\META_PREFIX . 'storage_time' );
+			$query->set( 'orderby', 'meta_value_num' );
+			break;
+	}
+
+	// Nothing left to modify.
 }

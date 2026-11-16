@@ -193,7 +193,7 @@ function set_cs_sortable_columns( $columns ) {
 		true, // Initialise with my specified order, false to disregard
 		__( 'Original Post Type' ),
 		__( 'Table ordered by original post type.' ),
-		'asc',
+		'desc',
 	];
 
 	// Return the resulting array.
