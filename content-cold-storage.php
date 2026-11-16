@@ -32,12 +32,16 @@ define( __NAMESPACE__ . '\META_PREFIX', 'ccs_meta_' );
 define( __NAMESPACE__ . '\NONCE_PREFIX', 'ccs_nonce_' );
 define( __NAMESPACE__ . '\OPTION_PREFIX', 'ccs_setting_' );
 
+// Set our folders up.
+define( __NAMESPACE__ . '\ASSETS_URL', plugin_dir_url( __FILE__ ) . 'assets' );
+
 // And load our files.
 require_once __DIR__ . '/includes/admin/config.php';
 require_once __DIR__ . '/includes/admin/columns.php';
 require_once __DIR__ . '/includes/admin/display.php';
 require_once __DIR__ . '/includes/admin/notices.php';
 require_once __DIR__ . '/includes/admin/process.php';
+require_once __DIR__ . '/includes/admin/queries.php';
 require_once __DIR__ . '/includes/admin/triggers.php';
 
 require_once __DIR__ . '/includes/structure/bulk-actions.php';

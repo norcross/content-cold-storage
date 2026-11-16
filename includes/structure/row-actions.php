@@ -47,8 +47,8 @@ function add_cold_storage_row_action( array $actions, \WP_Post $post ) {
 		$setup_link = add_query_arg( $setup_args, admin_url( '/' ) );
 
 		// And include our action.
-		$actions['ccs-add-cold'] = sprintf(
-			'<a class="ccs-action-row-link ccs-cold-store-row-link" href="%1$s" rel="bookmark" title="%2$s" aria-label="%2$s">%3$s</a>',
+		$actions['ccs-back-cold'] = sprintf(
+			'<a class="ccs-action-row-link ccs-cold-restore-row-link" href="%1$s" rel="bookmark" title="%2$s" aria-label="%2$s">%3$s</a>',
 			esc_url( $setup_link ),
 			esc_attr__( 'Restore this content to the original location.', 'content-cold-storage' ),
 			esc_html__( 'Restore', 'content-cold-storage' )

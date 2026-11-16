@@ -37,7 +37,8 @@ function run_enabled_row_processing() {
 	$check_trigger  = filter_input( INPUT_GET, 'ccs-action', FILTER_SANITIZE_SPECIAL_CHARS );
 
 	// Do nothing without it.
-	if ( empty( $check_trigger ) || 'ccs-single-run' !== $check_trigger ) {
+	// if ( empty( $check_trigger ) || 'ccs-single-run' !== $check_trigger ) {
+	if ( empty( $check_trigger ) || ! in_array( $check_trigger, ['ccs-single-run', 'ccs-single-restore'], true ) ) {
 		return;
 	}
 
@@ -57,9 +58,35 @@ function run_enabled_row_processing() {
 		wp_die( esc_html__( 'A post ID is required to run a cold storage request.', 'content-cold-storage' ), esc_html__( 'Content Cold Storage', 'content-cold-storage' ), [ 'back_link' => true ] );
 	}
 
+	// Hand it off based on the request type.
+	switch ( $check_trigger ) {
+
+		// Do our single run.
+		case 'ccs-single-run' :
+			run_single_row_move( $get_post_id );
+			break;
+
+		// Do our single restore.
+		case 'ccs-single-restore' :
+			run_single_row_restore( $get_post_id );
+			break;
+	}
+
+	// Nothing left.
+}
+
+/**
+ * Run the single move from a row action.
+ *
+ * @param  integer $post_id  The post ID being moved.
+ *
+ * @return void
+ */
+function run_single_row_move( $post_id = 0 ) {
+
 	// Now run it.
 	// @todo handle the error checking.
-	AdminProcess\process_single_storage( $get_post_id, 'row-action' );
+	AdminProcess\process_single_storage( $post_id, 'row-action' );
 
 	// Now set up the link that'll redirect.
 	$setup_args = [
@@ -74,6 +101,36 @@ function run_enabled_row_processing() {
 	// Do the redirect.
 	wp_safe_redirect( $setup_link );
 	exit;
+}
+
+/**
+ * Run the single restore from a row action.
+ *
+ * @param  integer $post_id  The post ID being moved.
+ *
+ * @return void
+ */
+function run_single_row_restore( $post_id = 0 ) {
+	wp_die('lets retore');
+	/*
+	// Now run it.
+	// @todo handle the error checking.
+	AdminProcess\process_single_storage( $post_id, 'row-action' );
+
+	// Now set up the link that'll redirect.
+	$setup_args = [
+		'post_type'   => filter_input( INPUT_GET, 'ccs-post-type', FILTER_SANITIZE_SPECIAL_CHARS ),
+		'ccs-success' => true,
+		'ccs-action'  => 'run-row',
+	];
+
+	// Get the link itself.
+	$setup_link  = add_query_arg( $setup_args, admin_url( '/edit.php' ) );
+
+	// Do the redirect.
+	wp_safe_redirect( $setup_link );
+	exit;
+	*/
 }
 
 /**

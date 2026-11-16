@@ -278,7 +278,7 @@ function include_table_filter_items( $post_type, $which ) {
 
 	// Use our custom dropdown for post types.
 	echo custom_filter_dropdown( [
-		'show_option_all' => __( 'All Types', 'content-cold-storage' ),
+		'show_option_all' => __( 'All Post Types', 'content-cold-storage' ),
 		'name'            => 'cs_original_type',
 		'selected'        => filter_input( INPUT_GET, 'cs_original_type', FILTER_SANITIZE_SPECIAL_CHARS ),
 		'dataset'         => original_type_dropdown_data(),
