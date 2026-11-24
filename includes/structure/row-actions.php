@@ -90,6 +90,11 @@ function add_cold_storage_row_action( array $actions, \WP_Post $post ) {
  */
 function restore_cold_storage_row_action( array $actions, \WP_Post $post ) {
 
+	// Don't show if it is disabled completely.
+	if ( false !== AdminConfig\check_restore_capability() ) {
+		return $actions;
+	}
+
 	// Don't show this for users who can't.
 	if ( ! current_user_can( AdminConfig\get_required_user_cap() ) ) {
 		return $actions;

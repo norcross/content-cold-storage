@@ -95,6 +95,11 @@ function process_single_storage( $post_id = 0, $source = '' ) {
  */
 function process_single_restore( $post_id = 0, $source = '' ) {
 
+	// Don't allow a restore if it is disabled completely.
+	if ( false !== AdminConfig\check_restore_capability() ) {
+		return new WP_Error( 'restricted_process', __( 'The restore functionality has been disabled.', 'content-cold-storage' ) );
+	}
+
 	// Don't allow this for users who can't.
 	if ( ! current_user_can( AdminConfig\get_required_user_cap() ) ) {
 		return new WP_Error( 'bad_user_cap', __( 'This user does not have the required permissions to run this process.', 'content-cold-storage' ) );

@@ -58,6 +58,11 @@ function run_enabled_row_processing() {
 		wp_die( esc_html__( 'A post ID is required to run a cold storage request.', 'content-cold-storage' ), esc_html__( 'Content Cold Storage', 'content-cold-storage' ), [ 'back_link' => true ] );
 	}
 
+	// Don't allow a restore if it is disabled completely.
+	if ( 'ccs-single-restore' === $check_trigger && false !== AdminConfig\check_restore_capability() ) {
+		wp_die( esc_html__( 'The restore functionality has been disabled.', 'content-cold-storage' ), esc_html__( 'Content Cold Storage', 'content-cold-storage' ), [ 'back_link' => true ] );
+	}
+
 	// Hand it off based on the request type.
 	switch ( $check_trigger ) {
 

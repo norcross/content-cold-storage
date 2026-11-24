@@ -93,6 +93,15 @@ function get_required_user_cap() {
 }
 
 /**
+ * Set whether or not things can be restored at all.
+ *
+ * @return boolean
+ */
+function check_restore_capability() {
+	return apply_filters( ACTION_PREFIX . 'disable_item_restore', false );
+}
+
+/**
  * Set any IDs that should not be allowed to move to cold storage. Includes front page and blog page IDs.
  *
  * @return array
